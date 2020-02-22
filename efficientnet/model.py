@@ -378,7 +378,8 @@ def EfficientNet(width_coefficient,
             img_input = input_tensor
 
     bn_axis = 3 if backend.image_data_format() == 'channels_last' else 1
-    activation = get_mish(**kwargs)
+    activation_swish = get_swish(**kwargs)
+    activation_mish = get_mish(**kwargs)
 
     # Build stem
     x = img_input
@@ -389,7 +390,7 @@ def EfficientNet(width_coefficient,
                       kernel_initializer=CONV_KERNEL_INITIALIZER,
                       name='stem_conv')(x)
     x = layers.BatchNormalization(axis=bn_axis, name='stem_bn')(x)
-    x = layers.Activation(activation, name='stem_activation')(x)
+    x = layers.Activation(activation_swish, name='stem_activation')(x)
 
     # Build blocks
     num_blocks_total = sum(block_args.num_repeat for block_args in blocks_args)
@@ -407,7 +408,7 @@ def EfficientNet(width_coefficient,
         # The first block needs to take care of stride and filter size increase.
         drop_rate = drop_connect_rate * float(block_num) / num_blocks_total
         x = mb_conv_block(x, block_args,
-                          activation=activation,
+                          activation=activation_swish,
                           drop_rate=drop_rate,
                           prefix='block{}a_'.format(idx + 1))
         block_num += 1
@@ -423,7 +424,7 @@ def EfficientNet(width_coefficient,
                     string.ascii_lowercase[bidx + 1]
                 )
                 x = mb_conv_block(x, block_args,
-                                  activation=activation,
+                                  activation=activation_swish,
                                   drop_rate=drop_rate,
                                   prefix=block_prefix)
                 block_num += 1
@@ -435,7 +436,7 @@ def EfficientNet(width_coefficient,
                       kernel_initializer=CONV_KERNEL_INITIALIZER,
                       name='top_conv')(x)
     x = layers.BatchNormalization(axis=bn_axis, name='top_bn')(x)
-    x = layers.Activation(activation, name='top_activation')(x)
+    x = layers.Activation(activation_mish, name='top_activation')(x)
     if include_top:
         x = layers.GlobalAveragePooling2D(name='avg_pool')(x)
         if dropout_rate and dropout_rate > 0:
