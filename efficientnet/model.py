@@ -39,6 +39,7 @@ from keras_applications.imagenet_utils import decode_predictions
 from keras_applications.imagenet_utils import preprocess_input as _preprocess_input
 
 from . import get_submodules_from_kwargs
+from .mish import get_mish
 
 backend = None
 layers = None
@@ -377,7 +378,7 @@ def EfficientNet(width_coefficient,
             img_input = input_tensor
 
     bn_axis = 3 if backend.image_data_format() == 'channels_last' else 1
-    activation = get_swish(**kwargs)
+    activation = get_mish(**kwargs)
 
     # Build stem
     x = img_input

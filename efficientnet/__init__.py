@@ -15,6 +15,7 @@
 
 import functools
 from .__version__ import __version__
+from .mish import get_mish
 
 _KERAS_BACKEND = None
 _KERAS_LAYERS = None
@@ -64,6 +65,7 @@ def init_keras_custom_objects():
     from . import model
 
     custom_objects = {
+        'mish': inject_tfkeras_modules(get_mish)(),
         'swish': inject_keras_modules(model.get_swish)(),
         'FixedDropout': inject_keras_modules(model.get_dropout)()
     }
@@ -76,6 +78,7 @@ def init_tfkeras_custom_objects():
     from . import model
 
     custom_objects = {
+        'mish': inject_tfkeras_modules(get_mish)(),
         'swish': inject_tfkeras_modules(model.get_swish)(),
         'FixedDropout': inject_tfkeras_modules(model.get_dropout)()
     }
